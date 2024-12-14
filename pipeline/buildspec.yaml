@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16  # Node.js version
+    commands:
+      - echo "Installing dependencies..."
+      - npm install  # Install dependencies from package.json
+  pre_build:
+    commands:
+      - echo "Running lint checks..."
+      - npm run lint  # Optional lint command
+  build:
+    commands:
+      - echo "Building the project..."
+      - npm run build  # Bundle or transpile the project
+  post_build:
+    commands:
+      - echo "Running tests..."
+      - npm test  # Run tests if necessary
+
+artifacts:
+  files:
+    - '**/*'  # Include all files for the artifact
+  base-directory: build  # Directory containing the final build (e.g., dist, build)
+  discard-paths: yes  # Discard folder structure for the output artifacts
+
+cache:
+  paths:
+    - 'node_modules/**/*'  # Cache node_modules to speed up builds

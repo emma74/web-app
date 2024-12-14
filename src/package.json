@@ -1,0 +1,19 @@
+{
+    "name": "my-web-app",
+    "version": "1.0.0",
+    "description": "A simple web application",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js",
+      "build": "echo Building the project...",
+      "lint": "echo Linting the project...",
+      "test": "echo Running tests..."
+    },
+    "dependencies": {
+      "express": "^4.17.1"
+    },
+    "devDependencies": {
+      "eslint": "^7.15.0"
+    }
+  }
+  

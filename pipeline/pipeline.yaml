@@ -1,0 +1,93 @@
+Resources:
+  # SNS Topic for notifications
+  MyWebAppPipelineNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: "MyWebApp Pipeline Notifications"
+      TopicName: "my-web-app-pipeline-notifications"
+
+  # The CodePipeline itself
+  MyWebAppPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: MyWebAppPipeline
+      RoleArn: arn:aws:iam::537448428381:role/MyWebAppPipelineRole
+      ArtifactStore:
+        Type: S3
+        Location: pipeline-artifacts-20241214
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                RepositoryName: my-web-app
+                BranchName: main
+                OAuthToken: 
+                  Ref: MyWebAppGitHubOAuthToken  #OAuth token from github
+              OutputArtifacts:
+                - SourceOutput
+              RunOrder: 1
+
+        - Name: Build
+          Actions:
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref MyWebAppBuildProject
+              InputArtifacts:
+                - SourceOutput
+              OutputArtifacts:
+                - BuildOutput
+              RunOrder: 1
+
+        - Name: Test
+          Actions:
+            - Name: TestAction
+              ActionTypeId:
+                Category: Test
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref MyWebAppTestProject
+              InputArtifacts:
+                - BuildOutput
+              RunOrder: 1
+
+        - Name: Deploy
+          Actions:
+            - Name: DeployAction
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CodeDeploy
+                Version: '1'
+              Configuration:
+                ApplicationName: MyWebApp
+                DeploymentGroupName: MyWebAppDeploymentGroup
+              InputArtifacts:
+                - BuildOutput
+              RunOrder: 1
+
+      # Set up notifications
+      Notifications:
+        - Name: PipelineNotification
+          Type: SNS
+          Target: !Ref MyWebAppPipelineNotificationTopic
+          Events:
+            - codepipeline-pipeline-pipelineExecutionFailed
+            - codepipeline-pipeline-pipelineExecutionSucceeded
+            - codepipeline-pipeline-pipelineExecutionStarted
+
+      ArtifactStore:
+        Type: S3
+        Location: pipeline-artifacts-20241214

@@ -1,0 +1,15 @@
+Resources:
+  MyWebAppBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: MyWebAppBuildProject
+      Source:
+        Type: GITHUB
+        Location: https://github.com/emma74/web-app.git
+      Environment:
+        Type: LINUX_CONTAINER
+        Image: aws/codebuild/standard:5.0
+        ComputeType: BUILD_GENERAL1_SMALL
+      Artifacts:
+        Type: S3
+        Location: pipeline-artifacts-20241214
