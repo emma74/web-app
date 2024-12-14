@@ -42,11 +42,12 @@ Resources:
                 Provider: CodeBuild
                 Version: '1'
               Configuration:
-                ProjectName: !Ref MyWebAppBuildProject
+                ActionMode: CHANGE_SET_REPLACE  # Replace existing changes or create a new stack
+                StackName: MyWebAppBuildStack
+                TemplatePath: SourceOutput::pipeline/build.yaml  # Reference build.yaml from the repo
+                Capabilities: CAPABILITY_NAMED_IAM  # Required if the template involves IAM resources
               InputArtifacts:
-                - SourceOutput
-              OutputArtifacts:
-                - BuildOutput
+                - Name: SourceOutput
               RunOrder: 1
 
         - Name: Test
@@ -63,20 +64,20 @@ Resources:
                 - BuildOutput
               RunOrder: 1
 
-        - Name: Deploy
-          Actions:
-            - Name: DeployAction
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Provider: CodeDeploy
-                Version: '1'
-              Configuration:
-                ApplicationName: MyWebApp
-                DeploymentGroupName: MyWebAppDeploymentGroup
-              InputArtifacts:
-                - BuildOutput
-              RunOrder: 1
+        # - Name: Deploy
+        #   Actions:
+        #     - Name: DeployAction
+        #       ActionTypeId:
+        #         Category: Deploy
+        #         Owner: AWS
+        #         Provider: CodeDeploy
+        #         Version: '1'
+        #       Configuration:
+        #         ApplicationName: MyWebApp
+        #         DeploymentGroupName: MyWebAppDeploymentGroup
+        #       InputArtifacts:
+        #         - BuildOutput
+        #       RunOrder: 1
 
       # Set up notifications
       Notifications:
